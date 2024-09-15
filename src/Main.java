@@ -41,8 +41,10 @@ public class Main {
         System.out.println("Кот " + cat1.getName() + " сытый: " + cat1.isFull());
         System.out.println("Кот " + cat2.getName() + " сытый: " + cat2.isFull());
 
-        // Выводим общее количество животных
+        // Выводим количество животных
         System.out.println("Общее количество животных:  " + Animal.getCount());
+        System.out.println("Всего собак: " + Dog.dogCount);
+        System.out.println("Всего котов: " + Cat.catCount);
 
         // Задача 2. Примеры создания фигур
         Shape circle = new Circle(9, "розовый", "зелёный");

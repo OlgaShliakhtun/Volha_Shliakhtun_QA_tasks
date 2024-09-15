@@ -1,4 +1,5 @@
 public class Cat extends Animal {
+    static int catCount = 0; // Счетчик котов
     private String name;
     private boolean isFull;
 
@@ -6,6 +7,7 @@ public class Cat extends Animal {
         super();
         this.name = name;
         this.isFull = false; // Изначально кот голоден
+        catCount++;
     }
 
     @Override

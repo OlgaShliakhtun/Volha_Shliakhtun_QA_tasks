@@ -1,9 +1,11 @@
 public class Dog extends Animal {
+    static int dogCount = 0; // Счетчик собак
     private String name;
 
     public Dog(String name) {
         super();
         this.name = name;
+        dogCount++;
     }
 
     @Override
