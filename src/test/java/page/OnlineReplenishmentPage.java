@@ -8,8 +8,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OnlineReplenishmentPage {
     private WebDriver driver;
@@ -59,9 +59,16 @@ public class OnlineReplenishmentPage {
 
     @FindBy(xpath = "//input[@id='connection-email']")
     private WebElement emailField;
+    @FindBy(xpath = "//div[@id='pay-section']")
+    private WebElement paySection;
+    @FindBy(xpath = "//form[@id='pay-connection']//button")
+    private WebElement continueButton;
+
     private WebElement popupSum;
+
     private WebElement popupPhoneNumber;
 
+    private WebElement buttonValue;
 
     // Конструктор класса
     public OnlineReplenishmentPage(WebDriver driver) {
@@ -69,6 +76,15 @@ public class OnlineReplenishmentPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         this.js = (JavascriptExecutor) driver;
         PageFactory.initElements(driver, this);
+    }
+
+    private void scrollToElement(WebElement element) {
+        js.executeScript("arguments[0].scrollIntoView({block:'center'});", element);
+    }
+
+    private void openSelect() {
+        scrollToElement(paySection);
+        wait.until(ExpectedConditions.elementToBeClickable(selectHeader)).click();
     }
 
     //Задание Л13 пункт 1
@@ -102,6 +118,8 @@ public class OnlineReplenishmentPage {
 
     // Задание Л14 пункт 1: проверка надписей в незаполненных полях для всех вариантов оплаты
     public void checkEmptyFieldLabelsForPaymentOptions() {
+        openSelect();
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         // Проверка полей для услуг связи
@@ -147,37 +165,49 @@ public class OnlineReplenishmentPage {
     //Задание Л13 пункт 4.1
     // Метод для заполнения полей для «Услуги связи»
     public void fillInTelecomServices(String phoneNumber, String amount, String connectionEmail) {
-        WebElement phoneNumberInput = driver.findElement(By.id("connection-phone"));
-        phoneNumberInput.sendKeys(phoneNumber);
-        WebElement sum = driver.findElement(By.id("connection-sum"));
-        sum.sendKeys(amount);
-        WebElement email = driver.findElement(By.id("connection-email"));
-        email.sendKeys(connectionEmail);
-        WebElement continueButton = driver.findElement(By.xpath("//*[@id='pay-connection']/button"));
+        phoneField.sendKeys(phoneNumber);
+        sumField.sendKeys(amount);
+        emailField.sendKeys(connectionEmail);
         continueButton.click();
-    }
 
-    public void fillPaymentForm(String phone, String sum, String email) {
-        phoneField.sendKeys(phone);
-        sumField.sendKeys(sum);
-        emailField.sendKeys(email);
     }
 
     // Задание Л13 пункт 4.2 + Задание Л14 пункт 2
-    // Метод для проверки работы кнопки "Продолжить", а также для проверки:
-    // а) корректности отображения суммы ,
-    // б) номера телефона,
     public String[] initPopupValues() {
-        // Ожидаем появления элементов на странице
-        driver.switchTo().frame(driver.findElement(By.xpath("//iframe[@class='bepaid-iframe']")));
+
+        // Ожидаем появления iframe
+        WebDriverWait waitForFrame = new WebDriverWait(driver, Duration.ofSeconds(10));
+        waitForFrame.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.xpath("//iframe[@class='bepaid-iframe']")));
+        // Теперь ожидаем появления элементов внутри iframe
         popupPhoneNumber = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[contains(.,'Номер:')]")));
         popupSum = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//span[contains(.,'BYN')]")));
+        buttonValue = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Оплатить')]")));
 
-        // Возвращаем текст элементов
-        String[] popupValues = new String[2];
-        popupValues[0] = popupPhoneNumber.getText();
-        popupValues[1] = popupSum.getText();
-        return popupValues;
+        String[] asd = new String[3];
+        asd[0] = popupPhoneNumber.getText();
+        asd[1] = popupSum.getText();
+        asd[2] = buttonValue.getText();
+        return asd;
+    }
+
+    public boolean areCardsDisplayedPopup() {
+        WebElement cards = driver.findElement(By.xpath("//div[@class='cards-brands cards-brands__container ng-tns-c61-0 ng-trigger ng-trigger-brandsState ng-star-inserted']"));
+        return cards.isDisplayed();
+    }
+
+    public String[] getPopupFieldsPlaceholders() {
+        WebElement cardNumber = driver.findElement(By.xpath("//div[@class='content ng-tns-c46-1']/label"));
+        WebElement cardDate = driver.findElement(By.xpath("//div[@class='content ng-tns-c46-4']/label"));
+        WebElement cardCvc = driver.findElement(By.xpath("//div[@class='content ng-tns-c46-5']/label"));
+        WebElement cardHolderName = driver.findElement(By.xpath("//div[@class='content ng-tns-c46-3']/label"));
+
+        String[] placeholders = new String[4];
+        placeholders[0] = cardNumber.getText();
+        placeholders[1] = cardDate.getText();
+        placeholders[2] = cardCvc.getText();
+        placeholders[3] = cardHolderName.getText();
+
+        return placeholders;
     }
 
     public void handleCookieConsent() {
